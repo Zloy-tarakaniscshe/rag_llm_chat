@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RAG system</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .messages {
+            height: 480px;
+            overflow-y: scroll;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .user-message {
+            background-color: #eaf8fe;
+            padding: 10px;
+            border-radius: 10px;
+            color: #333;
+        }
+        .ai-message {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Рекомендательная система - Расходомер</h1>
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message">
+                <p class="{% if message.ai_response %}ai-message{% else %}user-message{% endif %}">
+                    {{ message.user_input }}
+                    {% if message.ai_response %}
+                        <br><span style="font-style: italic;">{{ message.ai_response }}</span>
+                    {% endif %}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+    <form id="chat-form" method="post">
+        <input type="text" id="user-input" name="user_input" placeholder="Enter your message..." required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+<script>
+    document.getElementById('chat-form').onsubmit = function(e) {
+        e.preventDefault();
+        var userInput = document.getElementById('user-input').value;
+        if (userInput.trim() === '') {
+            return;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText).ai_response;
+                var messagesDiv = document.querySelector('.messages');
+                var newMessage = document.createElement('div');
+                newMessage.className = 'message';
+                newMessage.innerHTML = `
+                    <p class="user-message">${userInput}</p>
+                    <p class="ai-message">${response}</p>
+                `;
+<!--                messagesDiv.insertBefore(newMessage, messagesDiv.firstChild);-->
+                messagesDiv.appendChild(newMessage);
+                document.getElementById('user-input').value = '';
+                messagesDiv.scrollTop = 1400;
+            }
+        };
+        xhr.send(`user_input=${encodeURIComponent(userInput)}`);
+    };
+</script>
+</body>
+</html>

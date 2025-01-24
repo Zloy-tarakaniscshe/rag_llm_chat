@@ -1,0 +1,3 @@
+venv/
+.idea/
+chat_ai/rag_system/embedding.pickle
